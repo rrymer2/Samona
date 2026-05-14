@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.templatemonster.com)",
+      "WebFetch(domain:documentation.zemez.io)",
+      "WebFetch(domain:www.themedetect.com)",
+      "WebFetch(domain:grandviz.zemezdemo.com)"
+    ]
+  }
+}
