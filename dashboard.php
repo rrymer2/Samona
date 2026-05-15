@@ -17,8 +17,8 @@ $user = require_login();
   <header class="site-header">
     <div class="container nav">
       <a class="brand" href="index.html">
-        <span class="mark"></span>
-        Samoma<strong>.</strong>
+        <img class="brand-img brand-img-dark" src="assets/images/samona-logo-dark.svg" alt="Samona Industries">
+        <img class="brand-img brand-img-light" src="assets/images/samona-logo-light.svg" alt="" aria-hidden="true">
       </a>
       <ul class="nav-links" id="nav-links">
         <li><a href="index.html">Home</a></li>

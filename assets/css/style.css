@@ -217,6 +217,17 @@ body:has(.hero, .page-hero) .site-header:not(.scrolled) .nav-toggle span {
 }
 .brand strong { color: var(--gold-500); margin-left: 2px; }
 
+.brand-img {
+  display: block;
+  height: 90px;
+  width: auto;
+}
+.brand-img-light { display: none; }
+.site-header.scrolled .brand-img-dark { display: none; }
+.site-header.scrolled .brand-img-light { display: block; }
+.footer-grid .brand .brand-img { height: 110px; }
+.auth-aside .brand .brand-img { height: 140px; }
+
 .nav-links {
   display: flex;
   gap: 36px;
