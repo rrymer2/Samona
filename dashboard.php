@@ -1,0 +1,55 @@
+<?php
+require __DIR__ . '/auth/session.php';
+$user = require_login();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Portal — Samoma Industries</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="mark"></span>
+        Samoma<strong>.</strong>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="dashboard.php" class="active">Dashboard</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a class="btn btn-primary btn-compact" href="auth/logout.php">Sign out</a>
+        <button class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container">
+      <span class="eyebrow">Client Portal</span>
+      <h1>Welcome back, <em><?= htmlspecialchars($user['email']) ?></em>.</h1>
+      <p>You are signed in to the Samoma client workspace.</p>
+    </div>
+  </section>
+
+  <section style="padding: 80px 0;">
+    <div class="container">
+      <p>This is a placeholder dashboard. Project deliverables, engagement updates, and account settings will appear here.</p>
+      <p style="margin-top: 24px;"><a class="btn btn-primary" href="auth/logout.php">Sign out</a></p>
+    </div>
+  </section>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

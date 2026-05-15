@@ -71,7 +71,9 @@
         <h2>Access your account.</h2>
         <p class="lede">Use the credentials issued by your Samoma engagement partner.</p>
 
-        <form id="login-form" novalidate>
+        <form id="login-form" action="auth/login.php" method="post" novalidate>
+          <p class="form-banner" id="login-banner" hidden>Invalid email or password.</p>
+
           <div class="form-field" data-field="email">
             <label for="email">Work email</label>
             <input class="form-input" id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" />

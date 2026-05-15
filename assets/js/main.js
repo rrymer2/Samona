@@ -76,21 +76,39 @@
     counters.forEach(c => co.observe(c));
   }
 
-  // ---------- Login form (client-side stub) ----------
+  // ---------- Login form ----------
   const loginForm = $('#login-form');
   if (loginForm) {
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    loginForm.addEventListener('submit', (e) => {
+    const banner  = $('#login-banner');
+    const submit  = $('button[type="submit"]', loginForm);
+    const submitOriginalHTML = submit ? submit.innerHTML : '';
+
+    const showBanner = (msg) => {
+      if (!banner) return;
+      banner.textContent = msg;
+      banner.hidden = false;
+    };
+    const hideBanner = () => { if (banner) banner.hidden = true; };
+    const resetSubmit = () => {
+      if (!submit) return;
+      submit.disabled = false;
+      submit.innerHTML = submitOriginalHTML;
+    };
+
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      hideBanner();
+
       const emailField = $('[data-field="email"]', loginForm);
       const passField  = $('[data-field="password"]', loginForm);
       const emailInput = $('input', emailField);
       const passInput  = $('input', passField);
-      let ok = true;
 
       emailField.classList.remove('has-error');
       passField.classList.remove('has-error');
 
+      let ok = true;
       if (!emailRe.test(emailInput.value.trim())) {
         emailField.classList.add('has-error');
         ok = false;
@@ -101,10 +119,37 @@
       }
       if (!ok) return;
 
-      const submit = $('button[type="submit"]', loginForm);
       submit.disabled = true;
       submit.textContent = 'Signing in…';
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 900);
+
+      try {
+        const res = await fetch(loginForm.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            email: emailInput.value.trim(),
+            password: passInput.value,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok && data.ok) {
+          window.location.href = data.redirect || 'dashboard.php';
+          return;
+        }
+        if (res.status === 401) {
+          showBanner('Invalid email or password.');
+        } else if (res.status === 400) {
+          showBanner('Please enter your email and password.');
+        } else {
+          showBanner('Sign-in failed. Please try again.');
+        }
+      } catch (err) {
+        showBanner('Network error. Please try again.');
+      } finally {
+        resetSubmit();
+      }
     });
   }
 
