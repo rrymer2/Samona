@@ -173,6 +173,19 @@ p { margin: 0 0 1rem; }
   padding: 10px 0;
   box-shadow: var(--shadow-sm);
 }
+/* Header floats over a navy hero on home/about/services/dashboard.
+   While unscrolled, flip nav text to cream so it reads against navy. */
+body:has(.hero, .page-hero) .site-header:not(.scrolled) .brand,
+body:has(.hero, .page-hero) .site-header:not(.scrolled) .nav-links a,
+body:has(.hero, .page-hero) .site-header:not(.scrolled) .nav-phone {
+  color: var(--cream-50);
+}
+body:has(.hero, .page-hero) .site-header:not(.scrolled) .nav-phone span {
+  color: rgba(251, 248, 241, 0.65);
+}
+body:has(.hero, .page-hero) .site-header:not(.scrolled) .nav-toggle span {
+  background: var(--cream-50);
+}
 .nav {
   display: flex;
   align-items: center;
