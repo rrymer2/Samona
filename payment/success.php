@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-require __DIR__ . '/../auth/session.php';
-require __DIR__ . '/../auth/db.php';
-require __DIR__ . '/stripe.php';
+require_once __DIR__ . '/../auth/session.php';
+require_once __DIR__ . '/../auth/db.php';
+require_once __DIR__ . '/stripe.php';
 
 $user = require_login();
 
