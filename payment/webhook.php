@@ -64,14 +64,43 @@ if (!hash_equals($expected, $signature)) {
 
 // Signature valid — safe to process.
 $event = json_decode($payload, true);
-if (!is_array($event) || !isset($event['type'], $event['data']['object'])) {
+if (!is_array($event) || !isset($event['id'], $event['type'], $event['data']['object'])) {
     http_response_code(400);
     exit;
 }
 
-$type = (string) $event['type'];
-$obj  = $event['data']['object'];
-$pdo  = db();
+$eventId = (string) $event['id'];
+$type    = (string) $event['type'];
+$obj     = $event['data']['object'];
+$pdo     = db();
+
+// Log every verified event. Unique constraint on stripe_event_id absorbs
+// Stripe retries: a duplicate ON DUPLICATE KEY UPDATE is a no-op and we
+// detect by checking processed_at below.
+$alreadyProcessed = false;
+try {
+    $pdo->prepare(
+        'INSERT INTO payments_events (stripe_event_id, type, payload)
+              VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE received_at = received_at'
+    )->execute([$eventId, $type, $payload]);
+
+    $check = $pdo->prepare(
+        'SELECT processed_at FROM payments_events WHERE stripe_event_id = ? LIMIT 1'
+    );
+    $check->execute([$eventId]);
+    $row = $check->fetch();
+    $alreadyProcessed = $row && $row['processed_at'] !== null;
+} catch (Throwable $e) {
+    error_log('[payment/webhook] payments_events log failed: ' . $e->getMessage());
+}
+
+if ($alreadyProcessed) {
+    http_response_code(200);
+    header('Content-Type: application/json');
+    echo '{"received":true,"replay":true}';
+    exit;
+}
 
 try {
     switch ($type) {
@@ -128,8 +157,21 @@ try {
     }
 } catch (Throwable $e) {
     error_log('[payment/webhook] handler error for ' . $type . ': ' . $e->getMessage());
+    try {
+        $pdo->prepare(
+            'UPDATE payments_events SET error = ? WHERE stripe_event_id = ?'
+        )->execute([$e->getMessage(), $eventId]);
+    } catch (Throwable $_) { /* swallow */ }
     http_response_code(500);
     exit;
+}
+
+try {
+    $pdo->prepare(
+        'UPDATE payments_events SET processed_at = NOW() WHERE stripe_event_id = ?'
+    )->execute([$eventId]);
+} catch (Throwable $e) {
+    error_log('[payment/webhook] processed_at UPDATE failed: ' . $e->getMessage());
 }
 
 http_response_code(200);

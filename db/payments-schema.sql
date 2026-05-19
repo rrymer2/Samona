@@ -28,3 +28,20 @@ CREATE TABLE IF NOT EXISTS payments (
   CONSTRAINT fk_payments_user
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Per-event audit log for Stripe webhooks.
+-- UNIQUE on stripe_event_id gives free idempotency against Stripe retries —
+-- the same event can be received multiple times but only stored once.
+CREATE TABLE IF NOT EXISTS payments_events (
+  id              INT UNSIGNED   NOT NULL AUTO_INCREMENT,
+  stripe_event_id VARCHAR(255)   NOT NULL,                    -- evt_xxx
+  type            VARCHAR(100)   NOT NULL,                    -- e.g. checkout.session.completed
+  payload         MEDIUMTEXT     NOT NULL,                    -- raw JSON Stripe sent
+  received_at     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  processed_at    DATETIME       NULL DEFAULT NULL,           -- set after the handler completes cleanly
+  error           TEXT           NULL,                         -- non-null if the handler threw
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_payments_events_stripe (stripe_event_id),
+  KEY idx_payments_events_type     (type),
+  KEY idx_payments_events_received (received_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
