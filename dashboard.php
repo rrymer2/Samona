@@ -25,6 +25,7 @@ $user = require_login();
         <li><a href="about.html">About</a></li>
         <li><a href="services.html">Services</a></li>
         <li><a href="dashboard.php" class="active">Dashboard</a></li>
+        <li><a href="payment.php">Pay Invoice</a></li>
       </ul>
       <div class="nav-cta">
         <a class="btn btn-primary btn-compact" href="auth/logout.php">Sign out</a>
@@ -46,7 +47,10 @@ $user = require_login();
   <section style="padding: 80px 0;">
     <div class="container">
       <p>This is a placeholder dashboard. Project deliverables, engagement updates, and account settings will appear here.</p>
-      <p style="margin-top: 24px;"><a class="btn btn-primary" href="auth/logout.php">Sign out</a></p>
+      <p style="margin-top: 24px;">
+        <a class="btn btn-primary" href="payment.php">Pay an invoice</a>
+        <a class="btn btn-outline" href="auth/logout.php" style="margin-left: 12px;">Sign out</a>
+      </p>
     </div>
   </section>
 
