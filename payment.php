@@ -43,7 +43,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
   <section class="page-hero">
     <div class="container">
       <span class="eyebrow">Client Portal</span>
-      <h1>Pay an <em>invoice</em>.</h1>
+      <h3>Pay an <em>invoice</em>.</h3>
       <p>Secure payment via Stripe — your card details never touch our servers.</p>
     </div>
   </section>
@@ -61,7 +61,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
         </div>
 
         <div class="form-field">
-          <label for="reference">Invoice or PO reference</label>
+          <label for="reference">Payment For:</label>
           <input class="form-input" id="reference" name="reference" type="text" maxlength="50" required placeholder="INV-2026-014">
         </div>
 

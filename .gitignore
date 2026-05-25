@@ -1,3 +1,4 @@
 *.md
 auth/config.php
 payment/config.php
+config.php

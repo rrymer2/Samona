@@ -61,7 +61,7 @@ $user = require_login();
           <span class="portal-tile-label">Make Payment</span>
         </a>
 
-        <a class="portal-tile" href="#">
+        <a class="portal-tile" href="my-payments.php">
           <span class="portal-tile-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="9"/>
