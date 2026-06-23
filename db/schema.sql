@@ -6,6 +6,8 @@ SET NAMES utf8mb4;
 CREATE TABLE IF NOT EXISTS users (
   id              INT UNSIGNED   NOT NULL AUTO_INCREMENT,
   email           VARCHAR(254)   NOT NULL,
+  company_name    VARCHAR(120)   NULL DEFAULT NULL,
+  phone           VARCHAR(40)    NULL DEFAULT NULL,
   password_hash   VARCHAR(255)   NOT NULL,
   created_at      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),

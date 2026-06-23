@@ -62,7 +62,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
 
         <div class="form-field">
           <label for="reference">Payment For:</label>
-          <input class="form-input" id="reference" name="reference" type="text" maxlength="50" required placeholder="INV-2026-014">
+          <input class="form-input" id="reference" name="reference" type="text" maxlength="50" required placeholder="Payment for:">
         </div>
 
         <div class="form-field">

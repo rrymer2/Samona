@@ -25,6 +25,7 @@ $user = require_login();
         <li><a href="about.html">About</a></li>
         <li><a href="services.html">Services</a></li>
         <li><a href="dashboard.php" class="active">Dashboard</a></li>
+        <li><a href="profile.php">Profile</a></li>
         <li><a href="payment.php">Pay Invoice</a></li>
         <?php if (!empty($user['is_admin'])): ?>
           <li><a href="admin/index.php">Admin</a></li>
@@ -105,7 +106,7 @@ $user = require_login();
           <span class="portal-tile-label">Account transactions</span>
         </a>
 
-        <a class="portal-tile" href="#">
+        <a class="portal-tile" href="all-payments.php">
           <span class="portal-tile-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -115,6 +116,16 @@ $user = require_login();
             </svg>
           </span>
           <span class="portal-tile-label">Review all accounts</span>
+        </a>
+
+        <a class="portal-tile" href="profile.php">
+          <span class="portal-tile-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>
+            </svg>
+          </span>
+          <span class="portal-tile-label">My Profile</span>
         </a>
 
       </div>

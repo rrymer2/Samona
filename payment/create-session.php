@@ -84,7 +84,7 @@ try {
     )->execute([
         (int) $user['id'],
         (string) $session['id'],
-        $amountCents,
+        (float) $amount,
         $cfg['currency'],
         $reference,
         $email,

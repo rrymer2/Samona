@@ -1025,6 +1025,11 @@ textarea.form-input {
   border-radius: var(--radius-sm);
 }
 .form-banner[hidden] { display: none; }
+.form-banner-ok {
+  color: #1e7a46;
+  background: rgba(30, 122, 70, 0.08);
+  border-color: rgba(30, 122, 70, 0.25);
+}
 
 .form-row {
   display: flex;
@@ -1268,6 +1273,38 @@ textarea.form-input {
 .admin-table small { color: var(--ink-500); font-size: 0.82rem; }
 .admin-table a { color: var(--navy-800); }
 .admin-table a:hover { color: var(--gold-500); }
+
+.admin-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--cream-100);
+  color: var(--ink-600);
+}
+.admin-status-paid {
+  background: #d4edda;
+  color: #155724;
+}
+.admin-status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+.admin-status-expired {
+  background: #f8d7da;
+  color: #721c24;
+}
+.admin-status-failed {
+  background: #f8d7da;
+  color: #721c24;
+}
+.admin-status-refunded {
+  background: #d1ecf1;
+  color: #0c5460;
+}
 
 .admin-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .btn-tiny {

@@ -11,21 +11,20 @@ $grandTotal = 0.0;
 
 try {
     $stmt = db()->prepare(
-        'SELECT reference, customer_email, Total
-           FROM vwMyPayments
-          WHERE customer_email = ?
-          ORDER BY reference'
+        'SELECT u.email AS user_email, p.reference, SUM(p.amount) AS Total, COUNT(*) AS payment_count
+           FROM payments p
+           LEFT JOIN users u ON p.user_id = u.id
+          GROUP BY u.email, p.reference
+          ORDER BY u.email, p.reference'
     );
-    $stmt->execute([$user['email']]);
+    $stmt->execute();
     $rows = $stmt->fetchAll();
-    // vwMyPayments.Total is already in dollars (the view divides cents by 100),
-    // and is a decimal so it carries cents. Display as-is, no further scaling.
     foreach ($rows as $r) {
-        $grandTotal += (float) $r['Total'];
+        $grandTotal += (int) $r['Total'];
     }
 } catch (Throwable $e) {
-    error_log('[my-payments] query failed: ' . $e->getMessage());
-    $error = 'Unable to load your payments right now. Please try again later or contact projects@samoma.industries.';
+    error_log('[all-payments] query failed: ' . $e->getMessage());
+    $error = 'Unable to load payments right now. Please try again later.';
 }
 ?>
 <!DOCTYPE html>
@@ -33,7 +32,7 @@ try {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Payment History — Samoma Industries</title>
+  <title>All Payments — Samoma Industries</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
@@ -69,8 +68,8 @@ try {
   <section class="page-hero">
     <div class="container">
       <span class="eyebrow">Client Portal</span>
-      <h1>Payment <em>history</em>.</h1>
-      <p>Payments on record for <?= htmlspecialchars($user['email']) ?>.</p>
+      <h1>All <em>payments</em>.</h1>
+      <p>Complete payment history across all accounts.</p>
     </div>
   </section>
 
@@ -81,30 +80,34 @@ try {
         <p class="form-banner"><?= htmlspecialchars($error) ?></p>
 
       <?php elseif (empty($rows)): ?>
-        <p style="color: var(--ink-500);">No payments are on record for your account yet.</p>
-        <p style="margin-top: 24px;"><a class="btn btn-primary" href="payment.php">Make a payment</a></p>
+        <p style="color: var(--ink-500);">No payments recorded yet.</p>
+        <p style="margin-top: 24px;"><a class="btn btn-primary" href="dashboard.php">Back to dashboard</a></p>
 
       <?php else: ?>
         <div class="admin-table-wrap">
           <table class="admin-table">
             <thead>
               <tr>
+                <th>User Email</th>
                 <th>Reference</th>
-                <th style="text-align: right;">Total</th>
+                <th style="text-align: center;">Payments</th>
+                <th style="text-align: right;">Total (cents)</th>
               </tr>
             </thead>
             <tbody>
               <?php foreach ($rows as $r): ?>
                 <tr>
+                  <td><?= htmlspecialchars($r['user_email'] ?? '(unlinked)') ?></td>
                   <td><?= htmlspecialchars((string)$r['reference']) ?></td>
-                  <td style="text-align: right;">$<?= number_format((float)$r['Total'], 2) ?></td>
+                  <td style="text-align: center;"><?= (int)$r['payment_count'] ?></td>
+                  <td style="text-align: right;"><?= number_format((int)$r['Total']) ?></td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
             <tfoot>
               <tr>
-                <th>Total</th>
-                <th style="text-align: right;">$<?= number_format($grandTotal, 2) ?></th>
+                <th colspan="3">Total</th>
+                <th style="text-align: right;"><?= number_format((int)$grandTotal) ?></th>
               </tr>
             </tfoot>
           </table>
