@@ -1,0 +1,55 @@
+#!/bin/sh
+# Pre-commit secret guard for the Samoma site (public repo).
+#
+# Blocks two things:
+#   1. *config.example.php with a non-placeholder secret (the exact mistake
+#      that leaked real DB creds into the example file).
+#   2. High-confidence secret patterns (Stripe keys, AWS keys, private keys,
+#      the known leaked DB password) in ANY staged file.
+#
+# Bypass in a genuine false-positive with:  git commit --no-verify
+set -eu
+
+fail=0
+note() { printf '%s\n' "$*" >&2; }
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+
+# --- 1. Example config files must keep placeholder secrets only -------------
+for f in $staged; do
+  case "$f" in
+    *config.example.php)
+      content=$(git show ":$f" 2>/dev/null || true)
+      # Sensitive value lines that are NOT placeholders and NOT empty ('')
+      bad=$(printf '%s\n' "$content" \
+        | grep -nE "(password|secret_key|publishable_key|webhook_secret)['\"]?[[:space:]]*=>[[:space:]]*'" \
+        | grep -viE "CHANGE_ME|REPLACE_ME|=>[[:space:]]*''" || true)
+      if [ -n "$bad" ]; then
+        note "BLOCKED: $f contains a real-looking secret (example files must stay placeholders):"
+        printf '%s\n' "$bad" | sed 's/^/    /' >&2
+        note "  -> Keep CHANGE_ME / REPLACE_ME here; put real values in the gitignored config.php."
+        fail=1
+      fi
+      ;;
+  esac
+done
+
+# --- 2. High-confidence secret patterns in any added line -------------------
+# Exclude this hook itself — it legitimately contains the pattern strings.
+added=$(git diff --cached -U0 --diff-filter=ACM -- . ':(exclude).githooks/' | grep -E '^\+' | grep -vE '^\+\+\+' || true)
+hits=$(printf '%s\n' "$added" \
+  | grep -E "sk_live_[0-9A-Za-z]{8,}|sk_test_[0-9A-Za-z]{8,}|pk_live_[0-9A-Za-z]{8,}|rk_live_[0-9A-Za-z]{8,}|whsec_[0-9A-Za-z]{8,}|AKIA[0-9A-Z]{16}|BEGIN [A-Z ]*PRIVATE KEY|SixSons_@4650" \
+  | grep -viE "REPLACE_ME|CHANGE_ME|EXAMPLE" || true)
+if [ -n "$hits" ]; then
+  note "BLOCKED: staged changes contain a high-confidence secret:"
+  printf '%s\n' "$hits" | sed 's/^/    /' >&2
+  fail=1
+fi
+
+if [ "$fail" -ne 0 ]; then
+  note ""
+  note "Commit aborted by .githooks/pre-commit. Fix the above, or override with: git commit --no-verify"
+  exit 1
+fi
+exit 0
