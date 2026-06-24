@@ -1,5 +1,6 @@
 *.md
 !README.md
+.claude/settings.local.json
 auth/config.php
 payment/config.php
 config.php
