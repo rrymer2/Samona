@@ -11,12 +11,12 @@ $grandTotal = 0.0;
 
 try {
     $stmt = db()->prepare(
-        'SELECT u.email AS user_email, p.reference, SUM(p.amount) AS Total, COUNT(*) AS payment_count
+        "SELECT u.email AS user_email, p.reference, SUM(p.amount) AS Total, COUNT(*) AS payment_count
            FROM payments p
            LEFT JOIN users u ON p.user_id = u.id
           WHERE p.status = 'paid'
           GROUP BY u.email, p.reference
-          ORDER BY u.email, p.reference'
+          ORDER BY u.email, p.reference"
     );
     $stmt->execute();
     $rows = $stmt->fetchAll();
