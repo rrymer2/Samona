@@ -13,9 +13,11 @@ $paymentCount = 0;
 try {
     // Only paid payments — abandoned/expired/refunded checkouts must not appear
     // here. Queried directly off `payments` rather than vwMyPayments because that
-    // view exposes no status column to filter on. Total is cents -> dollars here.
+    // view exposes no status column to filter on. NOTE: create-session.php stores
+    // the dollar amount in `payments.amount` (not cents), so Total is summed as-is
+    // — no /100 division.
     $stmt = db()->prepare(
-        "SELECT reference, customer_email, COUNT(*) AS payment_count, SUM(amount) / 100 AS Total
+        "SELECT reference, customer_email, COUNT(*) AS payment_count, SUM(amount) AS Total
            FROM payments
           WHERE customer_email = ? AND status = 'paid'
           GROUP BY reference, customer_email
