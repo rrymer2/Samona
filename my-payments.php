@@ -7,21 +7,26 @@ require_once __DIR__ . '/auth/db.php';
 $user  = require_login();
 $rows  = [];
 $error = null;
-$grandTotal = 0.0;
+$grandTotal   = 0.0;
+$paymentCount = 0;
 
 try {
+    // Only paid payments — abandoned/expired/refunded checkouts must not appear
+    // here. Queried directly off `payments` rather than vwMyPayments because that
+    // view exposes no status column to filter on. Total is cents -> dollars here.
     $stmt = db()->prepare(
-        'SELECT reference, customer_email, Total
-           FROM vwMyPayments
-          WHERE customer_email = ?
-          ORDER BY reference'
+        "SELECT reference, customer_email, COUNT(*) AS payment_count, SUM(amount) / 100 AS Total
+           FROM payments
+          WHERE customer_email = ? AND status = 'paid'
+          GROUP BY reference, customer_email
+          ORDER BY reference"
     );
     $stmt->execute([$user['email']]);
     $rows = $stmt->fetchAll();
-    // vwMyPayments.Total is already in dollars (the view divides cents by 100),
-    // and is a decimal so it carries cents. Display as-is, no further scaling.
+    // Total is already in dollars (cents / 100) and carries cents as a decimal.
     foreach ($rows as $r) {
-        $grandTotal += (float) $r['Total'];
+        $grandTotal   += (float) $r['Total'];
+        $paymentCount += (int) $r['payment_count'];
     }
 } catch (Throwable $e) {
     error_log('[my-payments] query failed: ' . $e->getMessage());
@@ -90,6 +95,7 @@ try {
             <thead>
               <tr>
                 <th>Reference</th>
+                <th style="text-align: center;">Payments</th>
                 <th style="text-align: right;">Total</th>
               </tr>
             </thead>
@@ -97,6 +103,7 @@ try {
               <?php foreach ($rows as $r): ?>
                 <tr>
                   <td><?= htmlspecialchars((string)$r['reference']) ?></td>
+                  <td style="text-align: center;"><?= (int)$r['payment_count'] ?></td>
                   <td style="text-align: right;">$<?= number_format((float)$r['Total'], 2) ?></td>
                 </tr>
               <?php endforeach; ?>
@@ -104,6 +111,7 @@ try {
             <tfoot>
               <tr>
                 <th>Total</th>
+                <th style="text-align: center;"><?= number_format($paymentCount) ?></th>
                 <th style="text-align: right;">$<?= number_format($grandTotal, 2) ?></th>
               </tr>
             </tfoot>

@@ -14,6 +14,7 @@ try {
         'SELECT u.email AS user_email, SUM(p.amount) AS Total, COUNT(*) AS payment_count
            FROM payments p
            LEFT JOIN users u ON p.user_id = u.id
+          WHERE p.status = 'paid'
           GROUP BY u.email
           ORDER BY SUM(p.amount) DESC'
     );
