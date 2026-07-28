@@ -96,16 +96,6 @@ $user = require_login();
           <span class="portal-tile-label">Overall Balance</span>
         </a>
 
-        <a class="portal-tile" href="#">
-          <span class="portal-tile-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M7 4v16M7 20l-3-3M7 20l3-3"/>
-              <path d="M17 20V4M17 4l-3 3M17 4l3 3"/>
-            </svg>
-          </span>
-          <span class="portal-tile-label">Account transactions</span>
-        </a>
-
         <a class="portal-tile" href="all-payments.php">
           <span class="portal-tile-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -115,7 +105,7 @@ $user = require_login();
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
           </span>
-          <span class="portal-tile-label">Review all accounts</span>
+          <span class="portal-tile-label">Account transactions</span>
         </a>
 
         <a class="portal-tile" href="profile.php">

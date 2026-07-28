@@ -10,24 +10,29 @@ $error = null;
 $grandTotal = 0.0;
 
 try {
+    // Every paid transaction — collections and payouts, for both users and vendors.
     $stmt = db()->prepare(
-        "SELECT u.email AS user_email, p.reference,
-                SUM(CASE WHEN p.direction = 'out' THEN -p.amount ELSE p.amount END) AS Total,
-                COUNT(*) AS payment_count
+        "SELECT p.id, p.direction, p.counterparty, p.reference, p.amount, p.created_at,
+                u.email AS user_email, v.name AS vendor_name
            FROM payments p
-           LEFT JOIN users u ON p.user_id = u.id
-          WHERE p.status = 'paid' AND p.counterparty = 'user'
-          GROUP BY u.email, p.reference
-          ORDER BY u.email, p.reference"
+           LEFT JOIN users   u ON u.id = p.user_id
+           LEFT JOIN vendors v ON v.id = p.vendor_id
+          WHERE p.status = 'paid'
+          ORDER BY p.created_at DESC, p.id DESC"
     );
     $stmt->execute();
     $rows = $stmt->fetchAll();
     foreach ($rows as $r) {
-        $grandTotal += (float) $r['Total'];
+        $grandTotal += $r['direction'] === 'out' ? -(float)$r['amount'] : (float)$r['amount'];
     }
 } catch (Throwable $e) {
     error_log('[all-payments] query failed: ' . $e->getMessage());
     $error = 'Unable to load payments right now. Please try again later.';
+}
+
+// Sign before the $ (e.g. -$200.00, not $-200.00).
+function money(float $n): string {
+    return ($n < 0 ? '-$' : '$') . number_format(abs($n), 2);
 }
 ?>
 <!DOCTYPE html>
@@ -71,8 +76,8 @@ try {
   <section class="page-hero">
     <div class="container">
       <span class="eyebrow">Client Portal</span>
-      <h1>All <em>payments</em>.</h1>
-      <p>Complete payment history across all accounts.</p>
+      <h1>All <em>transactions</em>.</h1>
+      <p>Every collection and payout across users and vendors.</p>
     </div>
   </section>
 
@@ -91,26 +96,44 @@ try {
           <table class="admin-table">
             <thead>
               <tr>
-                <th>User Email</th>
+                <th>Counterparty</th>
                 <th>Reference</th>
-                <th style="text-align: center;">Payments</th>
-                <th style="text-align: right;">Total</th>
+                <th>Direction</th>
+                <th style="text-align: right;">Amount</th>
+                <th>Date</th>
               </tr>
             </thead>
             <tbody>
               <?php foreach ($rows as $r): ?>
+                <?php
+                  $isOut    = $r['direction'] === 'out';
+                  $isVendor = $r['counterparty'] === 'vendor';
+                  $name     = $isVendor
+                    ? ($r['vendor_name'] ?? '(deleted vendor)')
+                    : ($r['user_email'] ?? '(unlinked)');
+                  $signed   = $isOut ? -(float)$r['amount'] : (float)$r['amount'];
+                ?>
                 <tr>
-                  <td><?= htmlspecialchars($r['user_email'] ?? '(unlinked)') ?></td>
+                  <td>
+                    <?= htmlspecialchars($name) ?>
+                    <small style="color: var(--ink-500);">(<?= $isVendor ? 'Vendor' : 'User' ?>)</small>
+                  </td>
                   <td><?= htmlspecialchars((string)$r['reference']) ?></td>
-                  <td style="text-align: center;"><?= (int)$r['payment_count'] ?></td>
-                  <td style="text-align: right;">$<?= number_format((float)$r['Total'], 2) ?></td>
+                  <td>
+                    <span class="status-badge <?= $isOut ? 'status-denied' : 'status-approved' ?>">
+                      <?= $isOut ? 'Paid' : 'Collected' ?>
+                    </span>
+                  </td>
+                  <td style="text-align: right;"><?= money($signed) ?></td>
+                  <td><small><?= htmlspecialchars((string)$r['created_at']) ?></small></td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
             <tfoot>
               <tr>
-                <th colspan="3">Total</th>
-                <th style="text-align: right;">$<?= number_format((float)$grandTotal, 2) ?></th>
+                <th colspan="3">Net total</th>
+                <th style="text-align: right;"><?= money($grandTotal) ?></th>
+                <th></th>
               </tr>
             </tfoot>
           </table>
