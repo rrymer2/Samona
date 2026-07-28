@@ -11,6 +11,7 @@ $pendingRequests = (int) $pdo->query("SELECT COUNT(*) FROM access_requests WHERE
 $totalRequests   = (int) $pdo->query("SELECT COUNT(*) FROM access_requests")->fetchColumn();
 $totalUsers      = (int) $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $adminCount      = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE is_admin = 1")->fetchColumn();
+$txnCount        = (int) $pdo->query("SELECT COUNT(*) FROM payments WHERE type IN ('deposit', 'withdrawal')")->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -50,6 +51,13 @@ $adminCount      = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE is_admin 
           <div class="admin-card-stat-label">Active users</div>
           <div class="admin-card-meta"><?= $adminCount ?> admin<?= $adminCount === 1 ? '' : 's' ?></div>
           <div class="admin-card-action">Manage →</div>
+        </a>
+
+        <a class="admin-card" href="transactions.php">
+          <div class="admin-card-stat"><?= $txnCount ?></div>
+          <div class="admin-card-stat-label">Deposits &amp; withdrawals</div>
+          <div class="admin-card-meta">Record a manual entry</div>
+          <div class="admin-card-action">Open →</div>
         </a>
 
       </div>

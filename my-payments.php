@@ -17,7 +17,8 @@ try {
     // the dollar amount in `payments.amount` (not cents), so Total is summed as-is
     // — no /100 division.
     $stmt = db()->prepare(
-        "SELECT reference, customer_email, COUNT(*) AS payment_count, SUM(amount) AS Total
+        "SELECT reference, customer_email, COUNT(*) AS payment_count,
+                SUM(CASE WHEN type = 'withdrawal' THEN -amount ELSE amount END) AS Total
            FROM payments
           WHERE customer_email = ? AND status = 'paid'
           GROUP BY reference, customer_email
@@ -33,6 +34,11 @@ try {
 } catch (Throwable $e) {
     error_log('[my-payments] query failed: ' . $e->getMessage());
     $error = 'Unable to load your payments right now. Please try again later or contact projects@samoma.industries.';
+}
+
+// Format a dollar amount with the sign before the $ (e.g. -$200.00, not $-200.00).
+function money(float $n): string {
+    return ($n < 0 ? '-$' : '$') . number_format(abs($n), 2);
 }
 ?>
 <!DOCTYPE html>
@@ -106,7 +112,7 @@ try {
                 <tr>
                   <td><?= htmlspecialchars((string)$r['reference']) ?></td>
                   <td style="text-align: center;"><?= (int)$r['payment_count'] ?></td>
-                  <td style="text-align: right;">$<?= number_format((float)$r['Total'], 2) ?></td>
+                  <td style="text-align: right;"><?= money((float)$r['Total']) ?></td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
@@ -114,7 +120,7 @@ try {
               <tr>
                 <th>Total</th>
                 <th style="text-align: center;"><?= number_format($paymentCount) ?></th>
-                <th style="text-align: right;">$<?= number_format($grandTotal, 2) ?></th>
+                <th style="text-align: right;"><?= money($grandTotal) ?></th>
               </tr>
             </tfoot>
           </table>

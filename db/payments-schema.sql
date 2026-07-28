@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS payments (
   customer_email           VARCHAR(254)   NULL,
   status                   ENUM('pending', 'paid', 'expired', 'failed', 'refunded')
                                           NOT NULL DEFAULT 'pending',
+  type                     ENUM('payment', 'deposit', 'withdrawal')
+                                          NOT NULL DEFAULT 'payment',
   created_at               TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   paid_at                  DATETIME       NULL DEFAULT NULL,
   updated_at               TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -24,6 +26,7 @@ CREATE TABLE IF NOT EXISTS payments (
   KEY idx_payments_user    (user_id),
   KEY idx_payments_intent  (stripe_payment_intent_id),
   KEY idx_payments_status  (status),
+  KEY idx_payments_type    (type),
   KEY idx_payments_created (created_at),
   CONSTRAINT fk_payments_user
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL

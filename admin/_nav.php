@@ -16,6 +16,7 @@ function admin_nav_active(string $current, string $page): string {
       <li><a href="index.php"<?= admin_nav_active($current, 'index.php') ?>>Overview</a></li>
       <li><a href="access-requests.php"<?= admin_nav_active($current, 'access-requests.php') ?>>Access requests</a></li>
       <li><a href="users.php"<?= admin_nav_active($current, 'users.php') ?>>Users</a></li>
+      <li><a href="transactions.php"<?= admin_nav_active($current, 'transactions.php') ?>>Transactions</a></li>
       <li><a href="../dashboard.php">Portal</a></li>
     </ul>
     <div class="nav-cta">
