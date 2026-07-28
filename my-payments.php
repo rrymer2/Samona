@@ -18,7 +18,7 @@ try {
     // — no /100 division.
     $stmt = db()->prepare(
         "SELECT reference, customer_email, COUNT(*) AS payment_count,
-                SUM(CASE WHEN type = 'withdrawal' THEN -amount ELSE amount END) AS Total
+                SUM(CASE WHEN direction = 'out' THEN -amount ELSE amount END) AS Total
            FROM payments
           WHERE customer_email = ? AND status = 'paid'
           GROUP BY reference, customer_email

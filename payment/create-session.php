@@ -79,8 +79,8 @@ if (empty($session['url']) || empty($session['id'])) {
 try {
     db()->prepare(
         'INSERT INTO payments
-           (user_id, stripe_session_id, amount, currency, reference, customer_email, status)
-         VALUES (?, ?, ?, ?, ?, ?, "pending")'
+           (user_id, counterparty, stripe_session_id, amount, currency, reference, customer_email, status, direction)
+         VALUES (?, "user", ?, ?, ?, ?, ?, "pending", "in")'
     )->execute([
         (int) $user['id'],
         (string) $session['id'],

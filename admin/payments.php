@@ -12,18 +12,18 @@ $grandTotal = 0.0;
 try {
     $stmt = db()->prepare(
         "SELECT u.email AS user_email,
-                SUM(CASE WHEN p.type = 'withdrawal' THEN -p.amount ELSE p.amount END) AS Total,
+                SUM(CASE WHEN p.direction = 'out' THEN -p.amount ELSE p.amount END) AS Total,
                 COUNT(*) AS payment_count
            FROM payments p
            LEFT JOIN users u ON p.user_id = u.id
-          WHERE p.status = 'paid'
+          WHERE p.status = 'paid' AND p.counterparty = 'user'
           GROUP BY u.email
           ORDER BY Total DESC"
     );
     $stmt->execute();
     $rows = $stmt->fetchAll();
     foreach ($rows as $r) {
-        $grandTotal += (int) $r['Total'];
+        $grandTotal += (float) $r['Total'];
     }
 } catch (Throwable $e) {
     error_log('[admin-payments] query failed: ' . $e->getMessage());
@@ -68,7 +68,7 @@ try {
               <tr>
                 <th>User Email</th>
                 <th style="text-align: center;">Payments</th>
-                <th style="text-align: right;">Total (cents)</th>
+                <th style="text-align: right;">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -76,14 +76,14 @@ try {
                 <tr>
                   <td><?= htmlspecialchars($r['user_email'] ?? '(unlinked)') ?></td>
                   <td style="text-align: center;"><?= (int)$r['payment_count'] ?></td>
-                  <td style="text-align: right;"><?= number_format((int)$r['Total']) ?></td>
+                  <td style="text-align: right;">$<?= number_format((float)$r['Total'], 2) ?></td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
             <tfoot>
               <tr>
                 <th colspan="2">Total</th>
-                <th style="text-align: right;"><?= number_format((int)$grandTotal) ?></th>
+                <th style="text-align: right;">$<?= number_format((float)$grandTotal, 2) ?></th>
               </tr>
             </tfoot>
           </table>

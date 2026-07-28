@@ -12,6 +12,7 @@ $totalRequests   = (int) $pdo->query("SELECT COUNT(*) FROM access_requests")->fe
 $totalUsers      = (int) $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $adminCount      = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE is_admin = 1")->fetchColumn();
 $txnCount        = (int) $pdo->query("SELECT COUNT(*) FROM payments WHERE type IN ('deposit', 'withdrawal')")->fetchColumn();
+$vendorCount     = (int) $pdo->query("SELECT COUNT(*) FROM vendors")->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,10 +54,17 @@ $txnCount        = (int) $pdo->query("SELECT COUNT(*) FROM payments WHERE type I
           <div class="admin-card-action">Manage →</div>
         </a>
 
+        <a class="admin-card" href="vendors.php">
+          <div class="admin-card-stat"><?= $vendorCount ?></div>
+          <div class="admin-card-stat-label">Vendors</div>
+          <div class="admin-card-meta">External payees &amp; payers</div>
+          <div class="admin-card-action">Manage →</div>
+        </a>
+
         <a class="admin-card" href="transactions.php">
           <div class="admin-card-stat"><?= $txnCount ?></div>
           <div class="admin-card-stat-label">Deposits &amp; withdrawals</div>
-          <div class="admin-card-meta">Record a manual entry</div>
+          <div class="admin-card-meta">Record a collection or payout</div>
           <div class="admin-card-action">Open →</div>
         </a>
 
